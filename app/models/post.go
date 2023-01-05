@@ -14,8 +14,8 @@ type Post struct {
 }
 
 type PostDetails struct {
-	Post   *Post
-	User   *User
-	Forum  *Forum
-	Thread *Thread
+	Post   *Post   `json:"post,omitempty"`
+	User   *User   `json:"author,omitempty"`
+	Forum  *Forum  `json:"forum,omitempty"`
+	Thread *Thread `json:"thread,omitempty"`
 }

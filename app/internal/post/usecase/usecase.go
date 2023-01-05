@@ -35,11 +35,7 @@ func New(postRepository postRep.RepositoryI, userRepository userRep.RepositoryI,
 	}
 }
 
-func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
-	if len(posts) == 0 {
-		return nil
-	}
-	
+func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {	
 	var thread *models.Thread
 	id, err := strconv.ParseUint(slugOrId, 10, 64)
 	if err == nil {
@@ -54,6 +50,10 @@ func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
 		}
 	}
 
+	if len(posts) == 0 {
+		return nil
+	}
+
 	for idx := range posts {
 		posts[idx].Thread = thread.Id
 		posts[idx].Forum = thread.Forum
@@ -62,11 +62,13 @@ func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
 			return err
 		}
 		if posts[idx].Parent != 0 {
-			_, err = uc.postRepository.SelectPostById(posts[idx].Parent)
+			selectedPost, err := uc.postRepository.SelectPostById(posts[idx].Parent)
 			if err == models.ErrNotFound {
 				return models.ErrConflict
 			} else if err != nil {
 				return err
+			} else if selectedPost.Thread != posts[idx].Thread {
+				return models.ErrConflict
 			}
 		}
 	}
@@ -81,27 +83,26 @@ func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
 		return err
 	}
 
-	for idx := range posts {
-		err = uc.forumRepository.CreateForumUser(posts[idx].Forum, posts[idx].Author)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func (uc *useCase) UpdatePost(post *models.Post) (error) {
-	_, err := uc.postRepository.SelectPostById(post.Id)
+	selectedPost, err := uc.postRepository.SelectPostById(post.Id)
 	if err != nil {
 		return err
 	}
 
-	// post.Author = selectedPost.Author
-	// post.Created = selectedPost.Created
-	// post.Forum = selectedPost.Forum
-	// post.Parent = selectedPost.Parent
-	// post.Thread = selectedPost.Thread
+	if post.Message == "" || post.Message == selectedPost.Message {
+		post.Id = selectedPost.Id
+		post.Message = selectedPost.Message
+		post.IsEdited = selectedPost.IsEdited
+		post.Author = selectedPost.Author
+		post.Created = selectedPost.Created
+		post.Forum = selectedPost.Forum
+		post.Parent = selectedPost.Parent
+		post.Thread = selectedPost.Thread
+		return nil
+	}
 
 	err = uc.postRepository.UpdatePost(post)
 	if err != nil {

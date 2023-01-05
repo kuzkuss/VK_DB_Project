@@ -80,13 +80,18 @@ func (delivery *Delivery) SelectPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	related := strings.Split(c.QueryParam("related"), ",")
-	for _, elem := range related {
-		if elem != "user" && elem != "forum" && elem != "thread" {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	queryRelated := c.QueryParam("related")
+	var related []string
+
+	if queryRelated != "" {
+		related = strings.Split(queryRelated, ",")
+		for _, elem := range related {
+			if elem != "user" && elem != "forum" && elem != "thread" {
+				c.Logger().Error(models.ErrBadRequest)
+				return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+			}
 		}
-	}
+	}	
 
 	post, err := delivery.PostUC.SelectPost(id, related)
 	if err != nil {
@@ -109,8 +114,9 @@ func (delivery *Delivery) SelectThreadPosts(c echo.Context) error {
 		limit = 100
 	}
 
-	since, err := strconv.Atoi(c.QueryParam("since"))
-	if err != nil {
+	sinceStr := c.QueryParam("since")
+	since, err := strconv.Atoi(sinceStr)
+	if sinceStr != "" && err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
@@ -122,8 +128,7 @@ func (delivery *Delivery) SelectThreadPosts(c echo.Context) error {
 
 	sort := c.QueryParam("sort")
 	if sort != "flat" && sort != "tree" && sort != "parent_tree" {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+		sort = "flat"
 	}
 
 	posts, err := delivery.PostUC.SelectThreadPosts(c.Param("slug_or_id"), limit, since, desc, sort)

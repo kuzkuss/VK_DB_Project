@@ -8,8 +8,7 @@ import (
 	elog "github.com/labstack/gommon/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-
+	
 	"github.com/kuzkuss/VK_DB_Project/app/cmd/server"
 
 	forumRep "github.com/kuzkuss/VK_DB_Project/app/internal/forum/repository"
@@ -37,8 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	db.Logger.LogMode(logger.Info)
 
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)

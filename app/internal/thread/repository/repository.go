@@ -38,11 +38,6 @@ func (dbThread *dataBase) CreateThread(thread *models.Thread) (error) {
 			return errors.Wrap(tx.Error, "database error (table threads)")
 		}
 	}
-	
-	// tx = dbThread.db.Model(&models.Forum{Slug: thread.Forum}).UpdateColumn("threads", gorm.Expr("threads + ?", 1))
-	// if tx.Error != nil {
-	// 	return errors.Wrap(tx.Error, "database error (table forum)")
-	// }
 
 	return nil
 }
@@ -115,7 +110,10 @@ func (dbThread *dataBase) SelectForumThreads(slug string, limit int, since strin
 }
 
 func (dbThread *dataBase) CreateVote(vote *models.Vote) (error) {
-	tx := dbThread.db.Create(vote)
+	tx := dbThread.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "thread_id"}, {Name: "nickname"}},
+		DoUpdates: clause.AssignmentColumns([]string{"voice"}),
+	  }).Create(vote)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "database error (table votes)")
 	}

@@ -19,7 +19,7 @@ func (delivery *Delivery) ClearData(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.NoContent(http.StatusCreated)
+	return c.NoContent(http.StatusOK)
 }
 
 func (delivery *Delivery) SelectStatus(c echo.Context) error {

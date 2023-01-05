@@ -66,11 +66,6 @@ func (uc *useCase) CreateThread(thread *models.Thread) (error) {
 		return err
 	}
 
-	err = uc.forumRepository.CreateForumUser(thread.Forum, thread.Author)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -107,26 +102,34 @@ func (uc *useCase) SelectThread(slugOrId string) (*models.Thread, error) {
 }
 
 func (uc *useCase) UpdateThread(thread *models.Thread, slugOrId string) (error) {
-	// var selectedThread *models.Thread
+	var selectedThread *models.Thread
 	id, err := strconv.ParseUint(slugOrId, 10, 64)
 	if err == nil {
-		_, err = uc.threadRepository.SelectThreadById(id)
+		selectedThread, err = uc.threadRepository.SelectThreadById(id)
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err = uc.threadRepository.SelectThreadBySlug(slugOrId)
+		selectedThread, err = uc.threadRepository.SelectThreadBySlug(slugOrId)
 		if err != nil {
 			return err
 		}
+		id = selectedThread.Id
 	}
 
-	// thread.Author = selectedThread.Author
-	// thread.Created = selectedThread.Created
-	// thread.Forum = selectedThread.Forum
-	// thread.Id = selectedThread.Id
-	// thread.Slug = selectedThread.Slug
-	// thread.Votes = selectedThread.Votes
+	if thread.Title == "" && thread.Message == "" {
+		thread.Author = selectedThread.Author
+		thread.Created = selectedThread.Created
+		thread.Forum = selectedThread.Forum
+		thread.Id = selectedThread.Id
+		thread.Slug = selectedThread.Slug
+		thread.Votes = selectedThread.Votes
+		thread.Title = selectedThread.Title
+		thread.Message = selectedThread.Message
+		return nil
+	}
+
+	thread.Id = id
 
 	err = uc.threadRepository.UpdateThread(thread)
 	if err != nil {
@@ -149,6 +152,11 @@ func (uc *useCase) CreateVote(vote *models.Vote, slugOrId string) (*models.Threa
 			return nil, err
 		}
 		id = thread.Id
+	} else {
+		_, err := uc.threadRepository.SelectThreadById(id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	vote.ThreadId = id

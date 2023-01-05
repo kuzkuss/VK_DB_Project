@@ -4,14 +4,12 @@ import (
 	"github.com/kuzkuss/VK_DB_Project/app/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type RepositoryI interface {
 	CreateForum(forum *models.Forum) (error)
 	SelectForumBySlug(slug string) (*models.Forum, error)
 	SelectForumUsers(slug string, limit int, since string, desc bool) ([]*models.User, error)
-	CreateForumUser(forum string, user string) (error)
 }
 
 type dataBase struct {
@@ -51,24 +49,32 @@ func (dbForum *dataBase) SelectForumUsers(slug string, limit int, since string, 
 
 	if desc {
 		if since != "" {
-			tx := dbForum.db.Table("forum_user").Select("u.nickname, u.fullname, u.about, u.email").Limit(limit).Where("forum = ? AND user < ?", slug, since).Joins("JOIN user u ON u.nickname=forum_user.user").Order("nickname desc").Scan(&users)
+			tx := dbForum.db.Limit(limit).Where("nickname IN (?)", dbForum.db.
+			Select("user_nickname").Table("forum_user").Where("forum = ? AND user_nickname < ?",
+			slug, since)).Order("nickname desc").Find(&users)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table forum_user)")
 			}
 		} else {
-			tx := dbForum.db.Table("forum_user").Select("u.nickname, u.fullname, u.about, u.email").Limit(limit).Where("forum = ?", slug).Joins("JOIN user u ON u.nickname=forum_user.user").Order("nickname desc").Scan(&users)
+			tx := dbForum.db.Limit(limit).Where("nickname IN (?)", dbForum.db.
+			Select("user_nickname").Table("forum_user").Where("forum = ?", slug)).
+			Order("nickname desc").Find(&users)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table forum_user)")
 			}
 		}
 	} else {
 		if since != "" {
-			tx := dbForum.db.Table("forum_user").Select("u.nickname, u.fullname, u.about, u.email").Limit(limit).Where("forum = ? AND user > ?", slug, since).Joins("JOIN user u ON u.nickname=forum_user.user").Order("nickname").Scan(&users)
+			tx := dbForum.db.Limit(limit).Where("nickname IN (?)", dbForum.db.
+			Select("user_nickname").Table("forum_user").Where("forum = ? AND user_nickname > ?",
+			slug, since)).Order("nickname").Find(&users)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table forum_user)")
 			}
 		} else {
-			tx := dbForum.db.Table("forum_user").Select("u.nickname, u.fullname, u.about, u.email").Limit(limit).Where("forum = ?", slug).Joins("JOIN user u ON u.nickname=forum_user.user").Order("nickname").Scan(&users)
+			tx := dbForum.db.Limit(limit).Where("nickname IN (?)", dbForum.db.
+			Select("user_nickname").Table("forum_user").Where("forum = ?", slug)).
+			Order("nickname").Find(&users)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table forum_user)")
 			}
@@ -76,18 +82,5 @@ func (dbForum *dataBase) SelectForumUsers(slug string, limit int, since string, 
 	}
 
 	return users, nil
-}
-
-func (dbForum *dataBase) CreateForumUser(forum string, user string) (error) {
-	fu := models.ForumUser {
-		Forum: forum,
-		User: user,
-	}
-	tx := dbForum.db.Table("forum_user").Clauses(clause.OnConflict{DoNothing: true}).Create(&fu)
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "database error (table forum_user)")
-	}
-
-	return nil
 }
 

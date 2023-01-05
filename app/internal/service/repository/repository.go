@@ -22,7 +22,7 @@ func New(db *gorm.DB) RepositoryI {
 }
 
 func (dbService *dataBase) ClearData() (error) {
-	tx := dbService.db.Exec("TRUNCATE post, thread, forum, user, forum_user cascade;")
+	tx := dbService.db.Exec("TRUNCATE posts, threads, forums, users, forum_user cascade;")
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "database error")
 	}
@@ -36,22 +36,22 @@ func (dbService *dataBase) SelectStatus() (*models.ServiceStatus, error) {
 	var count int64
 	tx := dbService.db.Model(&models.User{}).Count(&count)
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "database error (table user)")
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 	status.UserCount = count
 	tx = dbService.db.Model(&models.Forum{}).Count(&count)
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "database error (table forum)")
+		return nil, errors.Wrap(tx.Error, "database error (table forums)")
 	}
 	status.ForumCount = count
 	tx = dbService.db.Model(&models.Thread{}).Count(&count)
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "database error (table post)")
+		return nil, errors.Wrap(tx.Error, "database error (table posts)")
 	}
 	status.ThreadCount = count
 	tx = dbService.db.Model(&models.Post{}).Count(&count)
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "database error (table thread)")
+		return nil, errors.Wrap(tx.Error, "database error (table threads)")
 	}
 	status.PostCount = count
 
