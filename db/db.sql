@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS forums (
     user_nickname CITEXT NOT NULL REFERENCES users(nickname),
     slug CITEXT PRIMARY KEY,
     posts INT DEFAULT 0,
-    threads INT DEFAULT 0 -- был bigint
+    threads INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS threads (
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS forum_user (
 
 CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
-    parent INT, -- был bigint
+    parent INT,
     author CITEXT NOT NULL REFERENCES users(nickname),
     message TEXT NOT NULL,
     is_edited BOOLEAN NOT NULL,
@@ -77,23 +77,23 @@ AFTER UPDATE ON votes
 FOR EACH ROW
 EXECUTE PROCEDURE update_thread_votes_after_update();
 
-CREATE OR REPLACE FUNCTION insert_forum_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO forum_user (user_nickname, forum) VALUES (NEW.author, NEW.forum) ON CONFLICT DO NOTHING;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION insert_forum_user()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--     INSERT INTO forum_user (user_nickname, forum) VALUES (NEW.author, NEW.forum) ON CONFLICT DO NOTHING;
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER forum_user_post
-AFTER INSERT ON posts
-FOR EACH ROW
-EXECUTE PROCEDURE insert_forum_user();
+-- CREATE TRIGGER forum_user_post
+-- AFTER INSERT ON posts
+-- FOR EACH ROW
+-- EXECUTE PROCEDURE insert_forum_user();
 
-CREATE TRIGGER forum_user_thread
-AFTER INSERT ON threads
-FOR EACH ROW
-EXECUTE PROCEDURE insert_forum_user();
+-- CREATE TRIGGER forum_user_thread
+-- AFTER INSERT ON threads
+-- FOR EACH ROW
+-- EXECUTE PROCEDURE insert_forum_user();
 
 CREATE OR REPLACE FUNCTION update_post_tree()
 RETURNS TRIGGER AS $$

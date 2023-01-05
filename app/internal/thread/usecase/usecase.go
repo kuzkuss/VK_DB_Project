@@ -66,6 +66,11 @@ func (uc *useCase) CreateThread(thread *models.Thread) (error) {
 		return err
 	}
 
+	err = uc.forumRepository.CreateForumUser(thread.Forum, thread.Author)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

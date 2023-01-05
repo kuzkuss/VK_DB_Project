@@ -4,12 +4,14 @@ import (
 	"github.com/kuzkuss/VK_DB_Project/app/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type RepositoryI interface {
 	CreateForum(forum *models.Forum) (error)
 	SelectForumBySlug(slug string) (*models.Forum, error)
 	SelectForumUsers(slug string, limit int, since string, desc bool) ([]*models.User, error)
+	CreateForumUser(forum string, user string) (error)
 }
 
 type dataBase struct {
@@ -82,5 +84,18 @@ func (dbForum *dataBase) SelectForumUsers(slug string, limit int, since string, 
 	}
 
 	return users, nil
+}
+
+func (dbForum *dataBase) CreateForumUser(forum string, user string) (error) {
+	fu := models.ForumUser {
+		Forum: forum,
+		User: user,
+	}
+	tx := dbForum.db.Table("forum_user").Clauses(clause.OnConflict{DoNothing: true}).Create(&fu)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table forum_user)")
+	}
+
+	return nil
 }
 

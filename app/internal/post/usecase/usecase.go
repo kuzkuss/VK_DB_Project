@@ -83,6 +83,13 @@ func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
 		return err
 	}
 
+	for idx := range posts {
+		err = uc.forumRepository.CreateForumUser(posts[idx].Forum, posts[idx].Author)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
