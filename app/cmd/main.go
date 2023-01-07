@@ -1,31 +1,34 @@
 package main
 
 import (
+	// "context"
 	"log"
+	// "time"
 
+	// "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	elog "github.com/labstack/gommon/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	
+
 	"github.com/kuzkuss/VK_DB_Project/app/cmd/server"
 
+	forumDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/forum/delivery"
 	forumRep "github.com/kuzkuss/VK_DB_Project/app/internal/forum/repository"
 	forumUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/forum/usecase"
-	forumDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/forum/delivery"
-	userRep "github.com/kuzkuss/VK_DB_Project/app/internal/user/repository"
-	userUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/user/usecase"
-	userDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/user/delivery"
+	postDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/post/delivery"
 	postRep "github.com/kuzkuss/VK_DB_Project/app/internal/post/repository"
 	postUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/post/usecase"
-	postDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/post/delivery"
-	threadRep "github.com/kuzkuss/VK_DB_Project/app/internal/thread/repository"
-	threadUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/thread/usecase"
-	threadDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/thread/delivery"
+	serviceDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/service/delivery"
 	serviceRep "github.com/kuzkuss/VK_DB_Project/app/internal/service/repository"
 	serviceUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/service/usecase"
-	serviceDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/service/delivery"
+	threadDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/thread/delivery"
+	threadRep "github.com/kuzkuss/VK_DB_Project/app/internal/thread/repository"
+	threadUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/thread/usecase"
+	userDelivery "github.com/kuzkuss/VK_DB_Project/app/internal/user/delivery"
+	userRep "github.com/kuzkuss/VK_DB_Project/app/internal/user/repository"
+	userUsecase "github.com/kuzkuss/VK_DB_Project/app/internal/user/usecase"
 )
 
 var cfgPg = postgres.Config{DSN: "host=localhost user=db_pg password=db_postgres database=db_forum port=5432"}
@@ -36,6 +39,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// connConf, err := pgxpool.ParseConfig("user=db_pg password=db_postgres dbname=db_forum host=localhost port=5432 sslmode=disable")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// connConf.MaxConns = 100
+	// connConf.MaxConnLifetime = time.Minute
+	// connConf.MaxConnIdleTime = time.Second * 5
+
+	// pool, err := pgxpool.NewWithConfig(context.Background(), connConf)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// if err := pool.Ping(context.Background()); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)

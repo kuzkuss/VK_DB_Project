@@ -77,24 +77,6 @@ AFTER UPDATE ON votes
 FOR EACH ROW
 EXECUTE PROCEDURE update_thread_votes_after_update();
 
--- CREATE OR REPLACE FUNCTION insert_forum_user()
--- RETURNS TRIGGER AS $$
--- BEGIN
---     INSERT INTO forum_user (user_nickname, forum) VALUES (NEW.author, NEW.forum) ON CONFLICT DO NOTHING;
---     RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
-
--- CREATE TRIGGER forum_user_post
--- AFTER INSERT ON posts
--- FOR EACH ROW
--- EXECUTE PROCEDURE insert_forum_user();
-
--- CREATE TRIGGER forum_user_thread
--- AFTER INSERT ON threads
--- FOR EACH ROW
--- EXECUTE PROCEDURE insert_forum_user();
-
 CREATE OR REPLACE FUNCTION update_post_tree()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -133,3 +115,73 @@ CREATE TRIGGER insert_post_trigger_forum
 AFTER INSERT ON posts
 FOR EACH ROW
 EXECUTE PROCEDURE update_count_posts();
+
+
+
+
+-- Indexes
+
+-- CREATE INDEX IF NOT EXISTS index_forums_user_nickname ON forums (user_nickname);
+-- CREATE INDEX IF NOT EXISTS index_threads_author ON threads (author);
+-- CREATE INDEX IF NOT EXISTS index_threads_forum ON threads using hash (forum);
+-- CREATE INDEX IF NOT EXISTS index_forum_user_user_nickname ON forum_user (user_nickname);
+-- CREATE INDEX IF NOT EXISTS index_forum_user_forum ON forum_user (forum);
+-- CREATE INDEX IF NOT EXISTS index_posts_author ON posts using hash (author);
+-- CREATE INDEX IF NOT EXISTS index_posts_forum ON posts using hash (forum);
+-- CREATE INDEX IF NOT EXISTS index_posts_thread ON posts (thread);
+-- CREATE INDEX IF NOT EXISTS index_votes_thread_id ON votes (thread_id);
+-- CREATE INDEX IF NOT EXISTS index_votes_nickname ON votes (nickname);
+
+
+
+-- CREATE INDEX IF NOT EXISTS  index_users_email ON users (email);
+
+-- -- Threads
+-- CREATE INDEX IF NOT EXISTS index_slug_thread on threads using hash (slug);
+
+-- CREATE INDEX IF NOT EXISTS index_thread_forum_created ON threads (forum, created);
+
+-- -- Post
+-- CREATE INDEX IF NOT EXISTS index_parent_post on posts (parent);
+-- CREATE INDEX IF NOT EXISTS index_thread_post_tree_post on posts (thread, post_tree);
+-- CREATE INDEX IF NOT EXISTS index_first_parent_post on posts ((post_tree[1]), post_tree);
+
+-- -- Vote
+-- CREATE INDEX IF NOT EXISTS index_search_user_vote ON votes (nickname, thread_id, voice);
+
+-- VACUUM ANALYZE;
+
+
+-- Indexes change
+
+
+CREATE INDEX IF NOT EXISTS index_forums_user_nickname ON forums (user_nickname);
+CREATE INDEX IF NOT EXISTS index_threads_author ON threads (author);
+CREATE INDEX IF NOT EXISTS index_threads_forum ON threads (forum);
+CREATE INDEX IF NOT EXISTS index_posts_author ON posts (author);
+CREATE INDEX IF NOT EXISTS index_posts_forum ON posts (forum);
+CREATE INDEX IF NOT EXISTS index_posts_thread ON posts (thread);
+CREATE INDEX IF NOT EXISTS index_votes_thread_id ON votes (thread_id);
+CREATE INDEX IF NOT EXISTS index_votes_nickname ON votes (nickname);
+
+CREATE INDEX IF NOT EXISTS index_forum_user_forum ON forum_user (forum, user_nickname);
+
+
+
+CREATE INDEX IF NOT EXISTS  index_users_email ON users (email);
+
+-- Threads
+CREATE INDEX IF NOT EXISTS index_slug_thread on threads (slug);
+
+CREATE INDEX IF NOT EXISTS index_thread_forum_created ON threads (forum, created);
+
+-- Post
+CREATE INDEX IF NOT EXISTS index_parent_post on posts (parent);
+CREATE INDEX IF NOT EXISTS index_thread_post_tree_post on posts (thread, post_tree);
+CREATE INDEX IF NOT EXISTS index_first_parent_post on posts ((post_tree[1]), post_tree);
+
+-- Vote
+CREATE INDEX IF NOT EXISTS index_search_user_vote ON votes (nickname, thread_id, voice);
+
+VACUUM ANALYZE;
+

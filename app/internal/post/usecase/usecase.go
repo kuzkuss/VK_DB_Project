@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-openapi/strfmt"
 	forumRep "github.com/kuzkuss/VK_DB_Project/app/internal/forum/repository"
 	postRep "github.com/kuzkuss/VK_DB_Project/app/internal/post/repository"
 	threadRep "github.com/kuzkuss/VK_DB_Project/app/internal/thread/repository"
@@ -75,7 +76,7 @@ func (uc *useCase) CreatePosts(posts []*models.Post, slugOrId string) (error) {
 
 	timeNow := time.Now()
 	for idx := range posts {
-		posts[idx].Created = timeNow
+		posts[idx].Created = strfmt.DateTime(timeNow)
 	}
 
 	err = uc.postRepository.CreatePosts(posts)

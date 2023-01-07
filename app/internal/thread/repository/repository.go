@@ -82,24 +82,28 @@ func (dbThread *dataBase) SelectForumThreads(slug string, limit int, since strin
 
 	if desc {
 		if since != "" {
-			tx := dbThread.db.Limit(limit).Where("forum = ? AND created <= ?", slug, since).Order("created desc").Find(&threads)
+			tx := dbThread.db.Limit(limit).Where("forum = ? AND created <= ?", slug, since).
+			Order("created desc").Find(&threads)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table threads)")
 			}
 		} else {
-			tx := dbThread.db.Limit(limit).Where("forum = ?", slug).Order("created desc").Find(&threads)
+			tx := dbThread.db.Limit(limit).Where("forum = ?", slug).Order("created desc").
+			Find(&threads)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table threads)")
 			}
 		}
 	} else {
 		if since != "" {
-			tx := dbThread.db.Limit(limit).Where("forum = ? AND created >= ?", slug, since).Order("created").Find(&threads)
+			tx := dbThread.db.Limit(limit).Where("forum = ? AND created >= ?", slug, since).
+			Order("created").Find(&threads)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table threads)")
 			}
 		} else {
-			tx := dbThread.db.Limit(limit).Where("forum = ?", slug).Order("created").Find(&threads)
+			tx := dbThread.db.Limit(limit).Where("forum = ?", slug).Order("created").
+			Find(&threads)
 			if tx.Error != nil {
 				return nil, errors.Wrap(tx.Error, "database error (table threads)")
 			}
