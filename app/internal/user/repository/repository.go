@@ -50,7 +50,7 @@ func (dbUser *dataBase) SelectUserByNickName(nickname string) (*models.User, err
 func (dbUser *dataBase) SelectUsersByNickNameOrEmail(nickname string, email string) ([]*models.User, error) {
 	users := make([]*models.User, 0, 10)
 
-	tx := dbUser.db.Where("nickname = ? OR email = ?", nickname, email).Find(&users)
+	tx := dbUser.db.Where("email = ? OR nickname = ?", email, nickname).Find(&users)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}

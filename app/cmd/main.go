@@ -1,11 +1,7 @@
 package main
 
 import (
-	// "context"
 	"log"
-	// "time"
-
-	// "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	elog "github.com/labstack/gommon/log"
@@ -39,23 +35,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// connConf, err := pgxpool.ParseConfig("user=db_pg password=db_postgres dbname=db_forum host=localhost port=5432 sslmode=disable")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// connConf.MaxConns = 100
-	// connConf.MaxConnLifetime = time.Minute
-	// connConf.MaxConnIdleTime = time.Second * 5
-
-	// pool, err := pgxpool.NewWithConfig(context.Background(), connConf)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// if err := pool.Ping(context.Background()); err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)
